@@ -75,20 +75,23 @@ contract PumpFun is ERC20 {
 
     function calculateTokenAmount(uint256 buyEthAmount) public view returns (uint256) {
         uint256 supply = tokensSold;
-        uint256 tokenAmount =  (((ethAmount + buyEthAmount) ** 2) / 225 ether * (800000000 ether ) / 1 ether) - (((ethAmount ) ** 2) / 225 ether * (800000000 ether ) / 1 ether);
+        uint256 tokenAmount = 206559139 * (10 ** 9 ) * (Math.sqrt(buyEthAmount + ethAmount) - Math.sqrt(ethAmount));
         return tokenAmount;
     }
-    
-
+    // y = 206559139 * (10 ** 9 ) * sqrt(x)
+    // x = (y / (206559139 * 10^9))^2
     function calculateEthAmount(uint256 tokenAmount) public view returns (uint256) {
         uint256 supply = tokensSold;
         uint256 newSupply = supply - tokenAmount;
-        
-        // Using the inverse of the formula: x = sqrt((225 * y) / 800,000,000)
-        uint256 currentEth = Math.sqrt((225 ether * supply * 1 ether) / (800000000 ether));
-        uint256 newEth = Math.sqrt((225 ether * newSupply * 1 ether) / (800000000 ether));
+        // Using the inverse of the formula: x = (y / (206559139 * 10^9))^2 - ethAmount
+        uint256 currentEth = (supply * 1 ether  / (206559139 * 10**9))**2 / 1 ether / 1 ether ;
+        uint256 newEth = (newSupply * 1 ether  / (206559139 * 10**9))**2  / 1 ether / 1 ether   ;
         
         return currentEth - newEth;
+    }
+
+    function testEthAmount(uint256 tokenAmount) public view returns (uint256) {
+        return (tokenAmount * 1 ether  / (206559139 * 10**9))**2 / 1 ether / 1 ether;
     }
 
    
