@@ -15,7 +15,9 @@ contract EmissionTest is Test {
     PumpFunFactory public factory;
 
     function setUp() public{
+
       factory = new PumpFunFactory();
+      vm.deal(user1, 10000 ether);
     
 
     }
@@ -24,10 +26,8 @@ contract EmissionTest is Test {
         vm.startPrank(user1);
         factory.createPumpFun("PumpFun", "PFP");
         address[] memory tokens = factory.getDeployedPumpFuns();
-        uint256 amount = IPumpFun(tokens[0]).calculateTokenAmount(15 ether);
-        console.log(amount);
-        uint256 ethAmount = IPumpFun(tokens[0]).testEthAmount(30000 ether);
-        console.log(ethAmount);
+        IPumpFun(tokens[0]).buy{value: 16 ether}();
+      
     }
 
 

@@ -4,12 +4,17 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "./interfaces/IEvents.sol";
 
+import "./interfaces/IEvents.sol";
+import "./interfaces/IUniswapV2Router.sol";
+import "./interfaces/IUniswapV2Factory.sol";
+import "./interfaces/IUniswapPair.sol";
 contract PumpFun is ERC20 {
 
     address payable public owner;
     uint256 constant public MAX_SUPPLY = 1000000000 ether;
+    address constant public UNISWAP_V2_ROUTER = 0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24;
+    address constant public UNISWAP_V2_FACTORY = 0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6;
     IEvents public events;
     address public admin;
     bool public isPaused;
@@ -30,7 +35,7 @@ contract PumpFun is ERC20 {
 
     function buy() public payable {
         require(!isPaused, "Bonding curve phase ended");
-        require(ethAmount + msg.value <= MAX_ETH_AMOUNT, "Bonding curve phase ended");
+
         
         uint256 fee = (msg.value * FEE_PERCENTAGE) / 100;
         // Transfer fee to admin
@@ -49,6 +54,12 @@ contract PumpFun is ERC20 {
        if(ethAmount >= MAX_ETH_AMOUNT){
             isPaused = true;
             // add to uniswap
+        _approve(address(this), UNISWAP_V2_ROUTER, balanceOf(address (this)));
+
+        IUniswapV2Router02(UNISWAP_V2_ROUTER).addLiquidityETH{value: address(this).balance}(
+            address(this), balanceOf(address(this)), 0, 0, address(0), block.timestamp
+        );
+            
        }
     }
 
