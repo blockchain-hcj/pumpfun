@@ -12,6 +12,7 @@ contract PumpFun is ERC20 {
     uint256 constant public MAX_SUPPLY = 1000000000 ether;
     IEvents public events;
     address public admin;
+    bool public isPaused;
     event Withdrawal(uint amount, uint when);
     
 
@@ -29,6 +30,7 @@ contract PumpFun is ERC20 {
     uint256 public constant FEE_PERCENTAGE = 5; // 5% fee
 
     function buy() public payable {
+        require(!isPaused, "Bonding curve phase ended");
         require(ethAmount + msg.value <= MAX_ETH_AMOUNT, "Bonding curve phase ended");
         
         uint256 fee = (msg.value * FEE_PERCENTAGE) / 100;
@@ -45,16 +47,16 @@ contract PumpFun is ERC20 {
         tokensSold += tokensToMint;
 
         events.emitPumpFunEvents(true, ethAfterFee, tokensToMint, ethAmount, tokensSold);
-        // if (tokensSold == BONDING_CURVE_SUPPLY) {
-        //     // Transfer remaining tokens to Uniswap when bonding curve phase ends
-        //     _transfer(address(this), address(this), UNISWAP_SUPPLY);
-        //     // TODO: Implement Uniswap listing logic here
-        // }
+       if(ethAmount >= MAX_ETH_AMOUNT){
+            isPaused = true;
+            // add to uniswap
+       }
     }
 
 
     
     function sell(uint256 amount) public {
+        require(!isPaused, "Bonding curve phase ended");
         require(tokensSold > 0, "No tokens sold yet");
         require(balanceOf(msg.sender) >= amount, "Insufficient balance");
 
