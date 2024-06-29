@@ -20,7 +20,6 @@ contract PumpFun is ERC20 {
       _mint(address(this), MAX_SUPPLY);
       events = IEvents(_events);
       admin = _admin;
-
     }
 
     uint256 public constant MAX_ETH_AMOUNT = 15 ether;
