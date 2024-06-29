@@ -61,7 +61,7 @@ contract PumpFun is ERC20 {
 
     function calculateTokenAmount(uint256 buyEthAmount) public view returns (uint256) {
         uint256 supply = tokensSold;
-        uint256 tokenAmount =  ((ethAmount + buyEthAmount) ** 2) / 225 ether * (800000000 ether ) / 1 ether;
+        uint256 tokenAmount =  (((ethAmount + buyEthAmount) ** 2) / 225 ether * (800000000 ether ) / 1 ether) - (((ethAmount ) ** 2) / 225 ether * (800000000 ether ) / 1 ether);
         return tokenAmount;
     }
     
