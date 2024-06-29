@@ -36,7 +36,7 @@ contract PumpFun is ERC20 {
         tokensSold += tokensToMint;
 
 
-        events.emitPumpFunEvents(true, msg.value, tokensToMint);
+        events.emitPumpFunEvents(true, msg.value, tokensToMint, ethAmount, tokensSold);
         // if (tokensSold == BONDING_CURVE_SUPPLY) {
         //     // Transfer remaining tokens to Uniswap when bonding curve phase ends
         //     _transfer(address(this), address(this), UNISWAP_SUPPLY);
@@ -55,7 +55,7 @@ contract PumpFun is ERC20 {
         tokensSold -= amount;
         (bool success, ) = payable(msg.sender).call{value: ethToReturn}("");
         require(success, "ETH transfer failed");
-        events.emitPumpFunEvents(false, ethToReturn, amount);
+        events.emitPumpFunEvents(false, ethToReturn, amount, ethAmount, tokensSold);
 
     }
 
