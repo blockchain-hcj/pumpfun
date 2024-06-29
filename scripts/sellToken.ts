@@ -3,11 +3,12 @@ import ContractAddresses from "../DeploymentOutput.json";
 import fs from "fs";
 
 async function main() {
-
+    const [signer] = await ethers.getSigners();
     const token = await ethers.getContractAt("PumpFun", "0x66170fc5142e809ee919e92d927BfD7Cfc8fA97a");
-    const buy = await token.buy({value: ethers.parseEther('0.001')});
-    await buy.wait();
-    console.log(buy.hash);
+    console.log(await token.balanceOf(signer.address));
+    const sell = await token.sell(ethers.parseEther('2637123'));
+    await sell.wait();
+    console.log(sell.hash);
 
     
    
