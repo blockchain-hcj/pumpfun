@@ -22,8 +22,9 @@ contract PumpFunFactory is Ownable {
     }
 
     
-    function createPumpFun(string memory name, string memory symbol, bytes32 _salt) public payable  {
-        PumpFun newPumpFun = new PumpFun{value: msg.value, salt: _salt}(name, symbol, address(eventsContract), msg.sender);
+    function createPumpFun(string memory name, string memory symbol) public payable  {
+        bytes32 salt = getSalt(msg.sender);
+        PumpFun newPumpFun = new PumpFun{value: msg.value, salt: salt}(name, symbol, address(eventsContract), msg.sender);
         deployedPumpFuns.push(address(newPumpFun));
         eventsContract.setIsPumpToken(address(newPumpFun), true);
         userCreatedTokens[msg.sender].push(address(newPumpFun));
@@ -39,6 +40,18 @@ contract PumpFunFactory is Ownable {
         return keccak256(abi.encodePacked(sender, nonce));
     }
 
+
+    function getCreate2Address(string memory name, string memory symbol, address sender) public view returns (address) {
+        bytes32 salt = getSalt(sender);
+        bytes memory bytecode = abi.encodePacked(
+            type(PumpFun).creationCode,
+            abi.encode(name, symbol, address(eventsContract), sender)
+        );
+        bytes32 hash = keccak256(
+            abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(bytecode))
+        );
+        return address(uint160(uint(hash)));
+    }
 
 
     function getDeployedPumpFuns() public view returns (address[] memory) {
