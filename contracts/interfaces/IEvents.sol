@@ -7,5 +7,5 @@ interface IEvents {
 
     function emitPumpFunTransfer(address from, address to, uint256 amount) external;
 
-    function emitPumpFunEvents(bool isBuy, uint256 ethChangeAmount, uint256 tokenChangeAmount, uint256 currentEthAmount, uint256 currentTokenSold) external;
+    function emitPumpFunEvents(address account, bool isBuy, uint256 ethChangeAmount, uint256 tokenChangeAmount, uint256 currentEthAmount, uint256 currentTokenSold) external;
 }

@@ -19,14 +19,16 @@ contract PumpFun is ERC20 {
     address constant public UNISWAP_V2_FACTORY = 0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6;
     IEvents public events;
     bool public isPaused;
+    bool public initialized;
     IFactory public factory;
     event Withdrawal(uint amount, uint when);
     
 
-    constructor(string memory name, string memory symbol, address _events) ERC20(name, symbol){
+    constructor(string memory name, string memory symbol, address _events, address creator) ERC20(name, symbol) payable{
       _mint(address(this), MAX_SUPPLY);
       events = IEvents(_events);
       factory = IFactory(msg.sender);
+      buy_internal(creator, msg.value);
     }
 
     uint256 public constant MAX_ETH_AMOUNT = 15 ether;
@@ -36,9 +38,10 @@ contract PumpFun is ERC20 {
     uint256 public constant FEE_PERCENTAGE = 1; // 1% fee
 
     function buy() public payable {
+
+      
         require(!isPaused, "Bonding curve phase ended");
 
-        
         uint256 fee = (msg.value * FEE_PERCENTAGE) / 100;
         // Transfer fee to admin
         (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
@@ -52,7 +55,7 @@ contract PumpFun is ERC20 {
         _transfer(address(this), msg.sender, tokensToMint);
         tokensSold += tokensToMint;
 
-        events.emitPumpFunEvents(true, ethAfterFee, tokensToMint, ethAmount, tokensSold);
+        events.emitPumpFunEvents(msg.sender, true, ethAfterFee, tokensToMint, ethAmount, tokensSold);
        if(ethAmount >= MAX_ETH_AMOUNT){
             isPaused = true;
             // add to uniswap
@@ -64,6 +67,39 @@ contract PumpFun is ERC20 {
             
        }
     }
+
+    function buy_internal(address receiver, uint256 buyEthAmount) public  {
+        require(!initialized, "PumpFun already initialized");
+       
+        require(!isPaused, "Bonding curve phase ended");
+
+        uint256 fee = (buyEthAmount * FEE_PERCENTAGE) / 100;
+        // Transfer fee to admin
+        (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
+        require(success, "Fee transfer to feeReceiver failed");
+        uint256 ethAfterFee = buyEthAmount - fee;
+        
+        uint256 tokensToMint = calculateTokenAmount(ethAfterFee);
+        ethAmount += ethAfterFee;
+        require(tokensToMint > 0, "Not enough ETH sent");
+
+        _transfer(address(this),receiver, tokensToMint);
+        tokensSold += tokensToMint;
+
+        events.emitPumpFunEvents(receiver, true, ethAfterFee, tokensToMint, ethAmount, tokensSold);
+       if(ethAmount >= MAX_ETH_AMOUNT){
+            isPaused = true;
+            // add to uniswap
+        _approve(address(this), UNISWAP_V2_ROUTER, balanceOf(address (this)));
+
+        IUniswapV2Router(UNISWAP_V2_ROUTER).addLiquidityETH{value: address(this).balance}(
+            address(this), balanceOf(address(this)), 0, 0, address(0), block.timestamp
+        );
+            
+       }
+          initialized = true;
+    }
+
 
 
     
@@ -83,7 +119,7 @@ contract PumpFun is ERC20 {
         tokensSold -= amount;
         (success, ) = payable(msg.sender).call{value: ethAfterFee}("");
         require(success, "ETH transfer failed");
-        events.emitPumpFunEvents(false, ethAfterFee, amount, ethAmount, tokensSold);
+        events.emitPumpFunEvents(msg.sender, false, ethAfterFee, amount, ethAmount, tokensSold);
     }
 
     function calculateTokenAmount(uint256 buyEthAmount) public view returns (uint256) {
