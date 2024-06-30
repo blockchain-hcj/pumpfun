@@ -43,9 +43,8 @@ contract PumpFun is ERC20, ReentrancyGuard {
 
   
 
-    function buy() public payable nonReentrant{
+    function buy(uint256 slippage) public payable nonReentrant{
 
-      
         require(!isPaused, "Bonding curve phase ended");
 
         uint256 fee = (msg.value * FEE_PERCENTAGE) / 100;
@@ -55,13 +54,20 @@ contract PumpFun is ERC20, ReentrancyGuard {
         uint256 ethAfterFee = msg.value - fee;
         
         uint256 tokensToMint = calculateTokenAmount(ethAfterFee);
+        
+        // Check if the actual price is within the allowed slippage
+        uint256 actualPrice = (ethAfterFee * 1e18) / tokensToMint;
+        uint256 expectedPrice = getCurrentTokenPrice();
+        uint256 maxAcceptablePrice = expectedPrice * (10000 + slippage) / 10000;
+        if(ethAmount != 0 ){
+        require(actualPrice <= maxAcceptablePrice, "Price exceeds allowed slippage");
+        }
         ethAmount += ethAfterFee;
         require(ethAmount <= MAX_ETH_AMOUNT, "Max ETH amount reached");
         require(tokensToMint > 0, "Not enough ETH sent");
 
         _transfer(address(this), msg.sender, tokensToMint);
         tokensSold += tokensToMint;
-
         events.emitPumpFunEvents(msg.sender, true, ethAfterFee, tokensToMint, ethAmount, tokensSold, getCurrentTokenPrice());
        if(ethAmount >= MAX_ETH_AMOUNT){
             isPaused = true;
@@ -124,14 +130,18 @@ contract PumpFun is ERC20, ReentrancyGuard {
         return maxEthToBuy;
     }
 
-    
-    function sell(uint256 amount) public nonReentrant {
+    function sell(uint256 amount, uint256 slippage) public nonReentrant {
         require(!isPaused, "Bonding curve phase ended");
         require(tokensSold > 0, "No tokens sold yet");
         require(balanceOf(msg.sender) >= amount, "Insufficient balance");
 
         uint256 ethToReturn = calculateEthAmount(amount);
 
+        // Check if the actual price is within the allowed slippage
+        uint256 actualPrice = (ethToReturn  * 1e18) / amount;
+        uint256 expectedPrice = getCurrentTokenPrice();
+        uint256 minAcceptablePrice = expectedPrice * (10000 - slippage) / 10000;
+        require(actualPrice >= minAcceptablePrice, "Price below allowed slippage");
         uint256 fee = (ethToReturn * FEE_PERCENTAGE) / 100;
 
         (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
@@ -143,8 +153,8 @@ contract PumpFun is ERC20, ReentrancyGuard {
         (success, ) = payable(msg.sender).call{value: ethAfterFee}("");
         require(success, "ETH transfer failed");
 
-    
         ethAmount -= ethToReturn;
+      
         events.emitPumpFunEvents(msg.sender, false, ethAfterFee, amount, ethAmount, tokensSold, getCurrentTokenPrice());
     }
 

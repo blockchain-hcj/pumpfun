@@ -29,15 +29,19 @@ contract EmissionTest is Test {
         factory.createPumpFun("PumpFun", "PFP");
         vm.startPrank(user2);
         address[] memory tokens = factory.getDeployedPumpFuns();
-            IPumpFun(tokens[0]).buy{value: 1 ether}();
+            IPumpFun(tokens[0]).buy{value: 1 ether}(10000);
+            IPumpFun(tokens[0]).buy{value: 0.1 ether}(500);
             uint256 balance = IERC20(tokens[0]).balanceOf(user2);
-            console.log(1 ether * 1 ether / balance);
-            uint256 maxEthToBuy = IPumpFun(tokens[0]).getMaxEthToBuy();
-            console.log(IPumpFun(tokens[0]).isPaused());
-            console.log(IPumpFun(tokens[0]).getCurrentTokenPrice());
-            IPumpFun(tokens[0]).buy{value: maxEthToBuy}();
-            console.log(IPumpFun(tokens[0]).isPaused());
-            console.log(IPumpFun(tokens[0]).getCurrentTokenPrice());
+
+            IPumpFun(tokens[0]).sell(balance, 400);
+            // uint256 balance = IERC20(tokens[0]).balanceOf(user2);
+            // console.log(1 ether * 1 ether / balance);
+            // uint256 maxEthToBuy = IPumpFun(tokens[0]).getMaxEthToBuy();
+            // console.log(IPumpFun(tokens[0]).isPaused());
+            // console.log(IPumpFun(tokens[0]).getCurrentTokenPrice());
+            // IPumpFun(tokens[0]).buy{value: maxEthToBuy}();
+            // console.log(IPumpFun(tokens[0]).isPaused());
+            // console.log(IPumpFun(tokens[0]).getCurrentTokenPrice());
     }
     
 
