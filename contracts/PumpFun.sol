@@ -56,7 +56,7 @@ contract PumpFun is ERC20 {
             // add to uniswap
         _approve(address(this), UNISWAP_V2_ROUTER, balanceOf(address (this)));
 
-        IUniswapV2Router02(UNISWAP_V2_ROUTER).addLiquidityETH{value: address(this).balance}(
+        IUniswapV2Router(UNISWAP_V2_ROUTER).addLiquidityETH{value: address(this).balance}(
             address(this), balanceOf(address(this)), 0, 0, address(0), block.timestamp
         );
             
