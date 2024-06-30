@@ -53,8 +53,9 @@ contract PumpFun is ERC20 {
         
         uint256 tokensToMint = calculateTokenAmount(ethAfterFee);
         ethAmount += ethAfterFee;
+        require(ethAmount <= MAX_ETH_AMOUNT, "Max ETH amount reached");
         require(tokensToMint > 0, "Not enough ETH sent");
-
+        
         _transfer(address(this), msg.sender, tokensToMint);
         tokensSold += tokensToMint;
 
@@ -103,7 +104,22 @@ contract PumpFun is ERC20 {
           initialized = true;
     }
 
-
+    function getMaxEthToBuy() public view returns (uint256) {
+        if (isPaused) {
+            return 0; // Bonding curve phase has ended
+        }
+        
+        uint256 remainingEth = MAX_ETH_AMOUNT - ethAmount;
+        
+        // Consider the fee when calculating the max ETH to buy
+        // We need to solve: remainingEth = buyAmount - (buyAmount * FEE_PERCENTAGE / 100)
+        // Rearranging: remainingEth = buyAmount * (1 - FEE_PERCENTAGE / 100)
+        // buyAmount = remainingEth / (1 - FEE_PERCENTAGE / 100)
+        
+        uint256 maxEthToBuy = remainingEth * 100 / (100 - FEE_PERCENTAGE);
+        
+        return maxEthToBuy;
+    }
 
     
     function sell(uint256 amount) public {

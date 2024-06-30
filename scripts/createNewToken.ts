@@ -9,7 +9,7 @@ async function main() {
     const name = "Test";
     const symbol = "TST";
     console.log(await factory.getCreate2Address(name, symbol, signer.address));    
-    const createToken = await factory.createPumpFun("Test", "TST");
+    const createToken = await factory.createPumpFun("Test", "TST", {value: ethers.parseEther('0.001')});
 
 
     const receipt = await createToken.wait();

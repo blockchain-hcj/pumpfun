@@ -12,4 +12,6 @@ interface IPumpFun {
     function approve(address spender, uint256 amount) external returns (bool);
 
     function testEthAmount(uint256 tokenAmount) external view returns (uint256);
+    function getMaxEthToBuy() external view returns (uint256);
+    function isPaused() external view returns (bool);
 }
