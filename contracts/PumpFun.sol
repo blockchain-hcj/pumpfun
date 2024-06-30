@@ -33,7 +33,7 @@ contract PumpFun is ERC20 {
 
     uint256 public tokensSold;
     uint256 public ethAmount;
-    uint256 public constant FEE_PERCENTAGE = 5; // 5% fee
+    uint256 public constant FEE_PERCENTAGE = 1; // 1% fee
 
     function buy() public payable {
         require(!isPaused, "Bonding curve phase ended");
