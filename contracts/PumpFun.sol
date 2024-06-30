@@ -21,6 +21,11 @@ contract PumpFun is ERC20 {
     bool public isPaused;
     bool public initialized;
     IFactory public factory;
+    uint256 public constant MAX_ETH_AMOUNT = 15 ether;
+
+    uint256 public tokensSold;
+    uint256 public ethAmount;
+    uint256 public constant FEE_PERCENTAGE = 1; // 1% fee
     event Withdrawal(uint amount, uint when);
     
 
@@ -31,11 +36,7 @@ contract PumpFun is ERC20 {
       buy_internal(creator, msg.value);
     }
 
-    uint256 public constant MAX_ETH_AMOUNT = 15 ether;
-
-    uint256 public tokensSold;
-    uint256 public ethAmount;
-    uint256 public constant FEE_PERCENTAGE = 1; // 1% fee
+  
 
     function buy() public payable {
 

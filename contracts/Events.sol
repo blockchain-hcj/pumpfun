@@ -18,7 +18,7 @@ contract Events {
         require(msg.sender == factory, "Only factory can set isPumpToken");
         isPumpToken[token] = value;
     }
-
+    
     function emitPumpFunEvents(address account, bool isBuy, uint256 ethChangeAmount, uint256 tokenChangeAmount, uint256 currentEthAmount, uint256 currentTokenSold) public {
         require(isPumpToken[msg.sender],"Only PumpFun tokens can emit events");
         emit PumpFunEvent(msg.sender, account, isBuy, ethChangeAmount, tokenChangeAmount, currentEthAmount, currentTokenSold);
