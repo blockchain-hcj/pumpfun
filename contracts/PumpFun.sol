@@ -101,10 +101,10 @@ contract PumpFun is ERC20 {
         return currentEth - newEth;
     }
 
-    function testEthAmount(uint256 tokenAmount) public view returns (uint256) {
-        return (tokenAmount * 1 ether  / (206559139 * 10**9))**2 / 1 ether / 1 ether;
-    }
 
-   
+    function _update(address from, address to, uint256 value) internal override {
+        super._update(from, to, value);
+        events.emitPumpFunTransfer(from, to, value);
+    }
 
 }

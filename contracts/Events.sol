@@ -9,6 +9,7 @@ contract Events {
     mapping (address => bool) public isPumpToken;
     address public factory;
     event PumpFunEvent(address indexed token, bool isBuy, uint256 ethChangeAmount, uint256 tokenChangeAmount, uint256 currentEthAmount, uint256 currentTokenAmount);
+    event PumpFunTransfer(address indexed token, address indexed from, address indexed to, uint256 amount);
     constructor(){
         factory = msg.sender;
     }
@@ -21,6 +22,13 @@ contract Events {
     function emitPumpFunEvents(bool isBuy, uint256 ethChangeAmount, uint256 tokenChangeAmount, uint256 currentEthAmount, uint256 currentTokenSold) public {
         require(isPumpToken[msg.sender],"Only PumpFun tokens can emit events");
         emit PumpFunEvent(msg.sender, isBuy, ethChangeAmount, tokenChangeAmount, currentEthAmount, currentTokenSold);
+    }
+
+
+     function emitPumpFunTransfer(address from, address to, uint256 amount) public {
+        require(isPumpToken[msg.sender],"Only PumpFun tokens can emit events");
+        emit PumpFunTransfer(msg.sender, from, to, amount);
+
     }
 
 

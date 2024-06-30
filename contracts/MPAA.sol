@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract DAOToken is  ERC20, ERC20Permit, Ownable {
+contract MPAA is  ERC20, ERC20Permit, Ownable {
     uint256 public  tax_rate = 5; // 5% tax
     uint256 public constant MAX_SUPPLY =  177674000000 ether;
     mapping(address => bool) public isWhitelisted;
