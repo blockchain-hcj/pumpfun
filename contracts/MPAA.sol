@@ -12,6 +12,7 @@ contract MPAA is  ERC20, ERC20Permit, Ownable {
     
     constructor() ERC20("MPAA", "MPAA") ERC20Permit("MPAA") Ownable(msg.sender) {
         _mint(msg.sender, MAX_SUPPLY);
+        isWhitelisted[msg.sender] = true;
     }
 
     function transfer(address recipient, uint256 amount) public virtual override returns (bool) {

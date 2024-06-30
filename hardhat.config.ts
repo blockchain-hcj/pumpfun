@@ -8,7 +8,7 @@ const config: HardhatUserConfig = {
   networks: {
     arbSepolia: {
       url: "https://arb-sepolia.g.alchemy.com/v2/I-ZVEdUQy4Mk3rwbsNAIp_MVql6coseO",
-      accounts: [Secrets.DEPLOYER_PRIVATEKEY],
+      accounts: [Secrets.DEPLOYER_PRIVATEKEY, Secrets.TEST1],
     }
   },
   defaultNetwork: "arbSepolia",
