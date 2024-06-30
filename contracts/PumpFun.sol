@@ -30,10 +30,12 @@ contract PumpFun is ERC20 {
     
 
     constructor(string memory name, string memory symbol, address _events, address creator) ERC20(name, symbol) payable{
-      _mint(address(this), MAX_SUPPLY);
-      events = IEvents(_events);
-      factory = IFactory(msg.sender);
-      buy_internal(creator, msg.value);
+         events = IEvents(_events);
+        _mint(address(this), MAX_SUPPLY);
+        factory = IFactory(msg.sender);
+        if(msg.value > 0){
+            buy_internal(creator, msg.value);
+        }
     }
 
   

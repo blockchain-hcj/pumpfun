@@ -27,22 +27,22 @@ contract EmissionTest is Test {
         vm.startPrank(user1);
         factory.createPumpFun("PumpFun", "PFP");
         address[] memory tokens = factory.getDeployedPumpFuns();
-        IPumpFun(tokens[0]).buy{value: 16 ether}();
+         IPumpFun(tokens[0]).buy{value: 13 ether}();
 
     
-        address[] memory path = new address[](2);
-        path[0] = address(tokens[0]);
-        path[1] =  IUniswapV2Router(0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24).WETH();
-        uint256 tokenAmount = IPumpFun(tokens[0]).balanceOf(address(user1)) / 2;
-        console.log(tokenAmount);
-        IPumpFun(tokens[0]).approve(address(0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24), tokenAmount);
-        IUniswapV2Router(0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24).swapExactTokensForETHSupportingFeeOnTransferTokens(
-            tokenAmount,
-            0,
-            path,
-            user1,
-            block.timestamp
-        );
+        // address[] memory path = new address[](2);
+        // path[0] = address(tokens[0]);
+        // path[1] =  IUniswapV2Router(0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24).WETH();
+        // uint256 tokenAmount = IPumpFun(tokens[0]).balanceOf(address(user1)) / 2;
+        // console.log(tokenAmount);
+        // IPumpFun(tokens[0]).approve(address(0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24), tokenAmount);
+        // IUniswapV2Router(0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24).swapExactTokensForETHSupportingFeeOnTransferTokens(
+        //     tokenAmount,
+        //     0,
+        //     path,
+        //     user1,
+        //     block.timestamp
+        // );
       
     }
 

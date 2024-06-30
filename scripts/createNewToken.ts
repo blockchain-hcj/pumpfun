@@ -5,8 +5,10 @@ import fs from "fs";
 async function main() {
 
     const factory = await ethers.getContractAt("PumpFunFactory", ContractAddresses.Factory.address);
-
-
+    const [signer] = await ethers.getSigners();
+    const name = "Test";
+    const symbol = "TST";
+    console.log(await factory.getCreate2Address(name, symbol, signer.address));    
     const createToken = await factory.createPumpFun("Test", "TST");
 
 
