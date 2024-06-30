@@ -34,6 +34,13 @@ contract PumpFunFactory is Ownable {
         return userCreatedTokens[user];
     }
 
+    function getSalt(address sender) public view returns (bytes32) {
+        uint256 nonce = userCreatedTokens[sender].length;
+        return keccak256(abi.encodePacked(sender, nonce));
+    }
+
+
+
     function getDeployedPumpFuns() public view returns (address[] memory) {
         return deployedPumpFuns;
     }
