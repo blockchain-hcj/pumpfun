@@ -9,6 +9,8 @@ import "./interfaces/IEvents.sol";
 import "./interfaces/IUniswapV2Router.sol";
 import "./interfaces/IUniswapV2Factory.sol";
 import "./interfaces/IUniswapPair.sol";
+import "./interfaces/IFactory.sol";
+
 contract PumpFun is ERC20 {
 
     address payable public owner;
@@ -16,15 +18,15 @@ contract PumpFun is ERC20 {
     address constant public UNISWAP_V2_ROUTER = 0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24;
     address constant public UNISWAP_V2_FACTORY = 0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6;
     IEvents public events;
-    address public admin;
     bool public isPaused;
+    IFactory public factory;
     event Withdrawal(uint amount, uint when);
     
 
-    constructor(string memory name, string memory symbol, address _events, address _admin) ERC20(name, symbol){
+    constructor(string memory name, string memory symbol, address _events) ERC20(name, symbol){
       _mint(address(this), MAX_SUPPLY);
       events = IEvents(_events);
-      admin = _admin;
+      factory = IFactory(msg.sender);
     }
 
     uint256 public constant MAX_ETH_AMOUNT = 15 ether;
@@ -39,8 +41,8 @@ contract PumpFun is ERC20 {
         
         uint256 fee = (msg.value * FEE_PERCENTAGE) / 100;
         // Transfer fee to admin
-        (bool success, ) = payable(admin).call{value: fee}("");
-        require(success, "Fee transfer to admin failed");
+        (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
+        require(success, "Fee transfer to feeReceiver failed");
         uint256 ethAfterFee = msg.value - fee;
         
         uint256 tokensToMint = calculateTokenAmount(ethAfterFee);
@@ -72,9 +74,9 @@ contract PumpFun is ERC20 {
 
         uint256 ethToReturn = calculateEthAmount(amount);
         uint256 fee = (ethToReturn * FEE_PERCENTAGE) / 100;
-        // Transfer fee to admin
-        (bool success, ) = payable(admin).call{value: fee}("");
-        require(success, "Fee transfer to admin failed");
+
+        (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
+        require(success, "Fee transfer to feeReceiver failed");
         uint256 ethAfterFee = ethToReturn - fee > balanceOf(address(this)) ? balanceOf(address(this)) : ethToReturn - fee;
         
         _transfer(msg.sender, address(this), amount);

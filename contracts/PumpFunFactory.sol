@@ -8,15 +8,22 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract PumpFunFactory is Ownable {
     Events public eventsContract;
     address[] public deployedPumpFuns;
+    address public feeReceiver;
 
 
     event CreatePumpFun(address indexed token);
     constructor() Ownable(msg.sender) {
         eventsContract = new Events();
+        feeReceiver = msg.sender;
     }
 
+    function setFeeReceiver(address newFeeReceiver) public onlyOwner {
+        feeReceiver = newFeeReceiver;
+    }
+
+    
     function createPumpFun(string memory name, string memory symbol) public  {
-        PumpFun newPumpFun = new PumpFun(name, symbol, address(eventsContract), owner());
+        PumpFun newPumpFun = new PumpFun(name, symbol, address(eventsContract));
         deployedPumpFuns.push(address(newPumpFun));
         eventsContract.setIsPumpToken(address(newPumpFun), true);
         emit CreatePumpFun(address(newPumpFun));
