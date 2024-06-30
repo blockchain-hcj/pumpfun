@@ -22,8 +22,8 @@ contract PumpFunFactory is Ownable {
     }
 
     
-    function createPumpFun(string memory name, string memory symbol, uint _salt) public payable  {
-        PumpFun newPumpFun = new PumpFun{value: msg.value, salt: bytes32(_salt)}(name, symbol, address(eventsContract), msg.sender);
+    function createPumpFun(string memory name, string memory symbol, bytes32 _salt) public payable  {
+        PumpFun newPumpFun = new PumpFun{value: msg.value, salt: _salt}(name, symbol, address(eventsContract), msg.sender);
         deployedPumpFuns.push(address(newPumpFun));
         eventsContract.setIsPumpToken(address(newPumpFun), true);
         userCreatedTokens[msg.sender].push(address(newPumpFun));
