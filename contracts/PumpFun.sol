@@ -10,8 +10,11 @@ import "./interfaces/IUniswapV2Router.sol";
 import "./interfaces/IUniswapV2Factory.sol";
 import "./interfaces/IUniswapPair.sol";
 import "./interfaces/IFactory.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract PumpFun is ERC20 {
+
+
+contract PumpFun is ERC20, ReentrancyGuard {
 
     address payable public owner;
     uint256 constant public MAX_SUPPLY = 1000000000 ether;
@@ -40,7 +43,7 @@ contract PumpFun is ERC20 {
 
   
 
-    function buy() public payable {
+    function buy() public payable nonReentrant{
 
       
         require(!isPaused, "Bonding curve phase ended");
@@ -55,11 +58,11 @@ contract PumpFun is ERC20 {
         ethAmount += ethAfterFee;
         require(ethAmount <= MAX_ETH_AMOUNT, "Max ETH amount reached");
         require(tokensToMint > 0, "Not enough ETH sent");
-        
+
         _transfer(address(this), msg.sender, tokensToMint);
         tokensSold += tokensToMint;
 
-        events.emitPumpFunEvents(msg.sender, true, ethAfterFee, tokensToMint, ethAmount, tokensSold);
+        events.emitPumpFunEvents(msg.sender, true, ethAfterFee, tokensToMint, ethAmount, tokensSold, getCurrentTokenPrice());
        if(ethAmount >= MAX_ETH_AMOUNT){
             isPaused = true;
             // add to uniswap
@@ -90,7 +93,7 @@ contract PumpFun is ERC20 {
         _transfer(address(this),receiver, tokensToMint);
         tokensSold += tokensToMint;
 
-        events.emitPumpFunEvents(receiver, true, ethAfterFee, tokensToMint, ethAmount, tokensSold);
+        events.emitPumpFunEvents(receiver, true, ethAfterFee, tokensToMint, ethAmount, tokensSold, getCurrentTokenPrice());
        if(ethAmount >= MAX_ETH_AMOUNT){
             isPaused = true;
             // add to uniswap
@@ -122,12 +125,13 @@ contract PumpFun is ERC20 {
     }
 
     
-    function sell(uint256 amount) public {
+    function sell(uint256 amount) public nonReentrant {
         require(!isPaused, "Bonding curve phase ended");
         require(tokensSold > 0, "No tokens sold yet");
         require(balanceOf(msg.sender) >= amount, "Insufficient balance");
 
         uint256 ethToReturn = calculateEthAmount(amount);
+
         uint256 fee = (ethToReturn * FEE_PERCENTAGE) / 100;
 
         (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
@@ -138,7 +142,10 @@ contract PumpFun is ERC20 {
         tokensSold -= amount;
         (success, ) = payable(msg.sender).call{value: ethAfterFee}("");
         require(success, "ETH transfer failed");
-        events.emitPumpFunEvents(msg.sender, false, ethAfterFee, amount, ethAmount, tokensSold);
+
+    
+        ethAmount -= ethToReturn;
+        events.emitPumpFunEvents(msg.sender, false, ethAfterFee, amount, ethAmount, tokensSold, getCurrentTokenPrice());
     }
 
     function calculateTokenAmount(uint256 buyEthAmount) public view returns (uint256) {
@@ -162,6 +169,20 @@ contract PumpFun is ERC20 {
     function _update(address from, address to, uint256 value) internal override {
         super._update(from, to, value);
         events.emitPumpFunTransfer(from, to, value);
+    }
+
+
+    function getCurrentTokenPrice() public view returns (uint256) {
+
+        // We need to calculate this at the current ethAmount
+        uint256 coefficient = 206559139 * (10 ** 9);
+        uint256 sqrtEthAmount = Math.sqrt(ethAmount);
+
+        // To maintain precision, we'll multiply by 1e18 and then divide
+        uint256 price =  (2 * sqrtEthAmount) * 1 ether/ coefficient ;
+        
+        // The price is in wei per token
+        return price;
     }
 
 }

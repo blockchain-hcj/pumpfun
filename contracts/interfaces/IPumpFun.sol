@@ -14,4 +14,5 @@ interface IPumpFun {
     function testEthAmount(uint256 tokenAmount) external view returns (uint256);
     function getMaxEthToBuy() external view returns (uint256);
     function isPaused() external view returns (bool);
+    function getCurrentTokenPrice() external view returns (uint256);
 }
