@@ -26,7 +26,7 @@ const config: HardhatUserConfig = {
       accounts: [Secrets.DEPLOYER_PRIVATEKEY, Secrets.TEST1],
     }
   },
-  defaultNetwork: "arbSepolia",
+  defaultNetwork: "baseSepolia",
 
 };
 

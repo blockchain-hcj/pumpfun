@@ -1,8 +1,17 @@
 {
   "Factory": {
-    "address": "0xCe1f8c49177bF9a8fac08BD3a4890C8c6e8B6941"
+    "address": "0xEe9C6147D9BB5D1bbA4C3a6AbFac6D91b2357410"
   },
   "Events": {
-    "address": "0xE097752Ce3131AE35bbD374e8EAC397FA6b5323B"
+    "address": "0x11cacE8cE614ddDA2Dc8CaFF16da5A326E1F941c"
+  },
+  "mpaa": {
+    "address": "0x6DB15568f0d2f40206A699B09c76C7A5133f7533"
+  },
+  "VotingEscrow": {
+    "address": "0x36D9a896CAf60a57C0700212A620220Bc32adB06"
+  },
+  "FeeDistributor": {
+    "address": "0x323EA2C8E781534b26A82E254A8f6b501c3d1580"
   }
 }
