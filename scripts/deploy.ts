@@ -4,6 +4,9 @@ import fs from "fs";
 
 async function main() {
 
+
+    const [signer] = await ethers.getSigners();
+    console.log(signer.address)
     let deploymentState: any = {}
 
     const Factory = await ethers.deployContract("PumpFunFactory", []);

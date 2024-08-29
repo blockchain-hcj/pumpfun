@@ -19,12 +19,21 @@ const config: HardhatUserConfig = {
   networks: {
     arbSepolia: {
       url: "https://arb-sepolia.g.alchemy.com/v2/I-ZVEdUQy4Mk3rwbsNAIp_MVql6coseO",
-      accounts: [Secrets.DEPLOYER_PRIVATEKEY, Secrets.TEST1],
+      accounts: [Secrets.DEPLOYER_PRIVATEKEY],
     },
     baseSepolia:{
       url: "https://base-sepolia.g.alchemy.com/v2/0cNsvrP9a82KWY24wOyUVpgKf8T7WJKQ",
-      accounts: [Secrets.DEPLOYER_PRIVATEKEY, Secrets.TEST1],
-    }
+      accounts: [Secrets.DEPLOYER_PRIVATEKEY],
+    },
+    base:{
+      url: "https://base-mainnet.g.alchemy.com/v2/Xh0nbBjvLDgQQ5HhFPi0NRU7_Rv_c6is",
+      accounts: [Secrets.DEPLOYER_PRIVATEKEY],
+    },
+    manta:{
+      url: "https://pacific-rpc.manta.network/http",
+      accounts: [Secrets.DEPLOYER_PRIVATEKEY],
+    },
+    
   },
   defaultNetwork: "baseSepolia",
 

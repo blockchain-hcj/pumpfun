@@ -102,7 +102,7 @@ contract VotingEscrow is Ownable, ReentrancyGuard {
 
     modifier onlyUserOrWhitelist() {
         if (msg.sender != tx.origin) {
-            require(contracts_whitelist[msg.sender], "Smart contract not allowed");
+ //           require(contracts_whitelist[msg.sender], "Smart contract not allowed");
         }
         _;
     }

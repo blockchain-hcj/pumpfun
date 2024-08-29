@@ -745,34 +745,6 @@ contract FeeDistributor is IFeeDistributor, Ownable, ReentrancyGuard {
         return _roundDownTimestamp(timestamp + WEEK_MINUS_SECOND);
     }
 
-function getClaimableReward(address user, IERC20 token) external view returns (uint256) {
-    // Simulate checkpointing
-    uint256 timeCursor = Math.min(_timeCursor, _userState[user].timeCursor);
-    uint256 userTimeCursor = _userState[user].timeCursor;
-    uint256 tokenTimeCursor = _tokenState[token].timeCursor;
-
-    uint256 firstUnclaimableWeek = Math.min(_roundUpTimestamp(Math.min(timeCursor, userTimeCursor)), _roundDownTimestamp(tokenTimeCursor));
-
-    uint256 nextUserTokenWeekToClaim = _getUserTokenTimeCursor(user, token);
-
-    uint256 amount;
-    for (uint256 i = 0; i < 20; ++i) {
-        if (nextUserTokenWeekToClaim >= firstUnclaimableWeek) break;
-
-        uint256 weeklyTokens = _tokensPerWeek[token][nextUserTokenWeekToClaim];
-        uint256 userBalance = _userBalanceAtTimestamp[user][nextUserTokenWeekToClaim];
-        uint256 totalSupply = _veSupplyCache[nextUserTokenWeekToClaim];
-
-        if (totalSupply > 0) {
-            amount += (weeklyTokens * userBalance) / totalSupply;
-        }
-
-        nextUserTokenWeekToClaim += 1 weeks;
-    }
-
-    return amount;
-}
-
     /**
      * @dev Reverts if the provided token cannot be claimed.
      */
