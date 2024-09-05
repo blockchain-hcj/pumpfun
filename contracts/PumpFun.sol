@@ -18,8 +18,8 @@ contract PumpFun is ERC20, ReentrancyGuard {
 
     address payable public owner;
     uint256 constant public MAX_SUPPLY = 1000000000 ether;
-    address constant public UNISWAP_V2_ROUTER = 0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24;
-    address constant public UNISWAP_V2_FACTORY = 0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6;
+    address constant public UNISWAP_V2_ROUTER = 0xA3C957B20779Abf06661E25eE361Be1430ef1038;
+    address constant public UNISWAP_V2_FACTORY = 0x31a78894a2B5dE2C4244cD41595CD0050a906Db3;
     IEvents public events;
     bool public isPaused;
     bool public initialized;
@@ -48,14 +48,14 @@ contract PumpFun is ERC20, ReentrancyGuard {
         require(!isPaused, "Bonding curve phase ended");
 
         uint256 fee = (msg.value * FEE_PERCENTAGE) / 100;
-        // Transfer fee to admin
-        (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
+        //Transfer fee to admin
+       (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
         require(success, "Fee transfer to feeReceiver failed");
         uint256 ethAfterFee = msg.value - fee;
-        
+      
         uint256 tokensToMint = calculateTokenAmount(ethAfterFee);
         
-        // Check if the actual price is within the allowed slippage
+        //Check if the actual price is within the allowed slippage
         uint256 actualPrice = (ethAfterFee * 1e18) / tokensToMint;
         uint256 expectedPrice = getCurrentTokenPrice();
         uint256 maxAcceptablePrice = expectedPrice * (10000 + slippage) / 10000;

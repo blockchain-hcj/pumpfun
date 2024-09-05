@@ -2,8 +2,18 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import { Secrets } from "./secrets";
 import "@nomicfoundation/hardhat-foundry";
+import "@matterlabs/hardhat-zksync-solc";
+import "@matterlabs/hardhat-zksync-deploy";
 
 const config: HardhatUserConfig = {
+  zksolc: {
+    version: "latest",
+    settings: {
+      optimizer: {
+        enabled: true,
+      },
+    },
+  },
   solidity: {
     compilers: [
       {
@@ -17,6 +27,13 @@ const config: HardhatUserConfig = {
       },]
     },
   networks: {
+    "zklink-sepolia": {
+      url: "https://sepolia.rpc.zklink.io",
+      ethNetwork: "sepolia",
+      zksync: true,
+      accounts: [Secrets.DEPLOYER_PRIVATEKEY],
+      verifyURL: "https://sepolia.explorer.zklink.io/contract_verification"
+    },
     arbSepolia: {
       url: "https://arb-sepolia.g.alchemy.com/v2/I-ZVEdUQy4Mk3rwbsNAIp_MVql6coseO",
       accounts: [Secrets.DEPLOYER_PRIVATEKEY],
