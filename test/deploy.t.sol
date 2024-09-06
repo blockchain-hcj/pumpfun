@@ -26,7 +26,7 @@ contract EmissionTest is Test {
 
     function testCreateToken() public{
 
-        factory.createPumpFun{value: 15 ether}("PumpFun", "PFP");
+        factory.createPumpFun{value: 11 ether}("PumpFun", "PFP");
         
         address[] memory tokens = factory.getDeployedPumpFuns();
         uint256 contractBalance = IPumpFun(tokens[0]).balanceOf(user1);

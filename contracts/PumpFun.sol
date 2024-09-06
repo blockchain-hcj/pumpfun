@@ -43,7 +43,7 @@ contract PumpFun is ERC20, ReentrancyGuard {
 
         uint256 fee = (buyEthAmount * FEE_PERCENTAGE) / 100;
         //Transfer fee to admin
-       (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
+        (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
         require(success, "Fee transfer to feeReceiver failed");
         uint256 ethAfterFee = buyEthAmount - fee;
       
@@ -85,8 +85,6 @@ contract PumpFun is ERC20, ReentrancyGuard {
 
             INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER).mint{value: address(this).balance}(params);
        }
-       
-
        
     }
 
@@ -141,7 +139,7 @@ contract PumpFun is ERC20, ReentrancyGuard {
         // Calculate the coefficient based on MAX_ETH_AMOUNT and MAX_SUPPLY
         // tokenAmount = co * ethAmount^2, where tokenAmount = 0.8 * MAX_SUPPLY and ethAmount = MAX_ETH_AMOUNT
         // Solving for co: co = (0.8 * MAX_SUPPLY) / MAX_ETH_AMOUNT^2
-        return (206559139 * 10**9)**2;
+        return (206559139 * 10**9);
     }
 
     function calculateTokenAmount(uint256 buyEthAmount) public view returns (uint256) {
