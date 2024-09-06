@@ -4,17 +4,17 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./interfaces/IEvents.sol";
 import "./interfaces/INonfungiblePositionManager.sol";
 import "./interfaces/IFactory.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 
 contract PumpFun is ERC20, ReentrancyGuard {
 
     address payable public owner;
     uint256 constant public MAX_SUPPLY = 1000000000 ether;
-    address constant public NONFUNGIBLE_POSITION_MANAGER = 0x45f84cf9620cecEDaf6742d38F480A5683030fe8;
+    address constant public NONFUNGIBLE_POSITION_MANAGER = 0xcd81E4B6D1Ac4C2C3647eA3F91AAd22Af86A4E26;
     IEvents public events;
     bool public isPaused;
     IFactory public factory;
@@ -86,7 +86,8 @@ contract PumpFun is ERC20, ReentrancyGuard {
                 deadline: block.timestamp
             });
 
-           INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER).mint{value: address(this).balance}(params);
+         // INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER).mint{value: address(this).balance}(params);
+
        }
     }
 
