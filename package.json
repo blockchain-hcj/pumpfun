@@ -11,6 +11,8 @@
     "@matterlabs/hardhat-zksync-solc": "^1.0.3",
     "@matterlabs/hardhat-zksync-upgradable": "^1.2.1",
     "@matterlabs/hardhat-zksync-verify": "^1.2.0",
+    "@uniswap/v3-core": "1.0.0",
+    "@uniswap/v3-periphery": "1.0.0",
     "ethers": "^6.0.0",
     "zksync-web3": "^0.17.1"
   }
