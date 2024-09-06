@@ -14,7 +14,7 @@ contract PumpFun is ERC20, ReentrancyGuard {
 
     address payable public owner;
     uint256 constant public MAX_SUPPLY = 1000000000 ether;
-    address constant public NONFUNGIBLE_POSITION_MANAGER = 0xC36442b4a4522E871399CD717aBDD847Ab11FE88;
+    address constant public NONFUNGIBLE_POSITION_MANAGER = 0x45f84cf9620cecEDaf6742d38F480A5683030fe8;
     IEvents public events;
     bool public isPaused;
     IFactory public factory;
@@ -31,13 +31,16 @@ contract PumpFun is ERC20, ReentrancyGuard {
         factory = IFactory(msg.sender);
         _mint(address(this), MAX_SUPPLY);
         if(msg.value > 0){
-            buy(creator, msg.value, 0);
+            _buy(creator, msg.value, 0);
         }
     }
 
-  
+    function buy(uint256 slippage) public payable nonReentrant{
+        _buy(msg.sender, msg.value, slippage);
+    }
+    
 
-    function buy(address receiver, uint256 buyEthAmount, uint256 slippage) public payable nonReentrant{
+    function _buy(address receiver, uint256 buyEthAmount, uint256 slippage) internal {
 
         require(!isPaused, "Bonding curve phase ended");
 
@@ -83,10 +86,23 @@ contract PumpFun is ERC20, ReentrancyGuard {
                 deadline: block.timestamp
             });
 
-            INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER).mint{value: address(this).balance}(params);
+           INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER).mint{value: address(this).balance}(params);
        }
-       
     }
+
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4) {
+        // Only accept NFTs from the Uniswap V3 position manager
+        require(msg.sender == NONFUNGIBLE_POSITION_MANAGER, "Only Uniswap V3 NFTs allowed");
+        return this.onERC721Received.selector;
+    }
+
+
+
 
     function getMaxEthToBuy() public view returns (uint256) {
         if (isPaused) {
