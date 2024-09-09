@@ -10,6 +10,9 @@ contract PumpFunFactory is Ownable {
     address[] public deployedPumpFuns;
     address public feeReceiver;
 
+    address public constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public constant NONFUNGIBLE_POSITION_MANAGER = 0xC36442b4a4522E871399CD717aBDD847Ab11FE88;
+    
     mapping(address => address[]) public userCreatedTokens;
     event CreatePumpFun(address indexed token);
     constructor() Ownable(msg.sender) {

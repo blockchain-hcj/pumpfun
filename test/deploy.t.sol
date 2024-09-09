@@ -33,7 +33,7 @@ contract EmissionTest is Test {
         uint256 maxEthToBuy = IPumpFun(tokens[0]).getMaxEthToBuy();
         console.log(maxEthToBuy);
         IPumpFun(tokens[0]).buy{value: maxEthToBuy }(100000000);
-
+        
             // IPumpFun(tokens[0]).buy{value: 1 ether}(10000);
 
             // IPumpFun(tokens[0]).buy{value: 0.1 ether}(500);

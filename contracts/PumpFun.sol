@@ -5,16 +5,17 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 import "./interfaces/IEvents.sol";
 import "./interfaces/INonfungiblePositionManager.sol";
 import "./interfaces/IFactory.sol";
+import "./interfaces/IWETH.sol";
 
 
-contract PumpFun is ERC20, ReentrancyGuard {
+contract PumpFun is ERC20, ReentrancyGuard, IERC721Receiver {
 
     address payable public owner;
     uint256 constant public MAX_SUPPLY = 1000000000 ether;
-    address constant public NONFUNGIBLE_POSITION_MANAGER = 0xcd81E4B6D1Ac4C2C3647eA3F91AAd22Af86A4E26;
     IEvents public events;
     bool public isPaused;
     IFactory public factory;
@@ -66,30 +67,14 @@ contract PumpFun is ERC20, ReentrancyGuard {
         _transfer(address(this), receiver, tokensToMint);
         tokensSold += tokensToMint;
         events.emitPumpFunEvents(receiver, true, ethAfterFee, tokensToMint, ethAmount, tokensSold, getCurrentTokenPrice());
-
         if(ethAmount >= MAX_ETH_AMOUNT){
             isPaused = true;
-            // add liquidity to Uniswap V3
-            _approve(address(this), NONFUNGIBLE_POSITION_MANAGER, balanceOf(address(this)));
-            
-            INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
-                token0: address(this),
-                token1: address(0), // ETH
-                fee: 3000, // 0.3% fee tier
-                tickLower: -887220,
-                tickUpper: 887220,
-                amount0Desired: balanceOf(address(this)),
-                amount1Desired: address(this).balance,
-                amount0Min: 0,
-                amount1Min: 0,
-                recipient: address(this),
-                deadline: block.timestamp
-            });
-
-         // INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER).mint{value: address(this).balance}(params);
-
+            _addLiquidity();
        }
     }
+
+
+    
 
     function onERC721Received(
         address operator,
@@ -98,7 +83,7 @@ contract PumpFun is ERC20, ReentrancyGuard {
         bytes calldata data
     ) external returns (bytes4) {
         // Only accept NFTs from the Uniswap V3 position manager
-        require(msg.sender == NONFUNGIBLE_POSITION_MANAGER, "Only Uniswap V3 NFTs allowed");
+       require(msg.sender == factory.NONFUNGIBLE_POSITION_MANAGER(), "Only Uniswap V3 NFTs allowed");
         return this.onERC721Received.selector;
     }
 
@@ -194,6 +179,53 @@ contract PumpFun is ERC20, ReentrancyGuard {
         
         // The price is in wei per token
         return price;
+    }
+
+
+    function _addLiquidity() internal {
+
+            _approve(address(this), factory.NONFUNGIBLE_POSITION_MANAGER(), balanceOf(address(this)));
+            address token0;
+            address token1;
+            if (address(this) < factory.WETH()) {
+                token0 = address(this);
+                token1 = factory.WETH();
+            } else {
+                token0 = factory.WETH();
+                token1 = address(this);
+            }
+
+            
+          INonfungiblePositionManager(factory.NONFUNGIBLE_POSITION_MANAGER()).createAndInitializePoolIfNecessary(
+                    token0,
+                    token1,
+                    3000,
+                    uint160(Math.sqrt(getCurrentTokenPrice()) * 2 ** 96)
+            );
+
+            uint256 wethBalance = address(this).balance;
+            IWETH(factory.WETH()).deposit{value: wethBalance}();
+            IWETH(factory.WETH()).approve(factory.NONFUNGIBLE_POSITION_MANAGER(), wethBalance);
+
+            uint256 token0Amount = token0 == address(this) ? balanceOf(address(this)) : wethBalance;
+            uint256 token1Amount = token1 == address(this) ? balanceOf(address(this)) : wethBalance;
+
+            INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
+                token0: token0,
+                token1: token1,
+                fee: 3000, // 0.3% fee tier
+                tickLower: 0,
+                tickUpper: 300000, 
+                amount0Desired: token0Amount,
+                amount1Desired: token1Amount,
+                amount0Min: 0, 
+                amount1Min: 0, 
+                recipient: address(this),
+                deadline: block.timestamp  // Allow 5 minutes to complete transaction
+            });
+
+            INonfungiblePositionManager(factory.NONFUNGIBLE_POSITION_MANAGER()).mint(params);
+        
     }
 
 }

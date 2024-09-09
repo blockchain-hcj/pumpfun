@@ -7,6 +7,8 @@ interface IFactory {
 
     function feeReceiver() external view returns (address);
 
+    function WETH() external view returns (address);
 
+    function NONFUNGIBLE_POSITION_MANAGER() external view returns (address);
 
 }
