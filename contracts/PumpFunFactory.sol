@@ -12,7 +12,7 @@ contract PumpFunFactory is Ownable {
 
     address public constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address public constant NONFUNGIBLE_POSITION_MANAGER = 0xC36442b4a4522E871399CD717aBDD847Ab11FE88;
-    
+
     mapping(address => address[]) public userCreatedTokens;
     event CreatePumpFun(address indexed token);
     constructor() Ownable(msg.sender) {
@@ -25,9 +25,9 @@ contract PumpFunFactory is Ownable {
     }
 
     
-    function createPumpFun(string memory name, string memory symbol) public payable  {
-        bytes32 salt = getSalt(msg.sender);
-        address create2Address = getCreate2Address(name, symbol, msg.sender);
+    function createPumpFun(string memory name, string memory symbol, string memory stringSalt) public payable  {
+        bytes32 salt = keccak256(abi.encodePacked(stringSalt));
+        address create2Address = getCreate2Address(name, symbol, msg.sender, stringSalt);
         eventsContract.setIsPumpToken(create2Address, true);
         PumpFun newPumpFun = new PumpFun{value: msg.value, salt: salt}(name, symbol, address(eventsContract), msg.sender);
         deployedPumpFuns.push(address(newPumpFun));
@@ -39,14 +39,9 @@ contract PumpFunFactory is Ownable {
         return userCreatedTokens[user];
     }
 
-    function getSalt(address sender) public view returns (bytes32) {
-        uint256 nonce = userCreatedTokens[sender].length;
-        return keccak256(abi.encodePacked(sender, nonce));
-    }
 
-
-    function getCreate2Address(string memory name, string memory symbol, address sender) public view returns (address) {
-        bytes32 salt = getSalt(sender);
+    function getCreate2Address(string memory name, string memory symbol, address sender, string memory stringSalt) public view returns (address) {
+        bytes32 salt = keccak256(abi.encodePacked(stringSalt));
         bytes memory bytecode = abi.encodePacked(
             type(PumpFun).creationCode,
             abi.encode(name, symbol, address(eventsContract), sender)
