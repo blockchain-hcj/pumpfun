@@ -27,8 +27,8 @@ async function main() {
   const PumpFunFactory = await deployer.deploy(artifact, []);
 
   // Wait for the deployment transaction to be confirmed
-  
   await PumpFunFactory.waitForDeployment();
+ 
   console.log(`PumpFunFactory deployed to ${ await PumpFunFactory.getAddress()}`);
 
   

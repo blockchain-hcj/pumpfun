@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.20;
 // Uncomment this line to use console.log
 
 
@@ -26,7 +26,7 @@ contract Events {
 
 
      function emitPumpFunTransfer(address from, address to, uint256 amount) public {
-        require(isPumpToken[msg.sender],"Only PumpFun tokens can emit events");
+        require(isPumpToken[msg.sender],"Only PumpFun tokens can emit transfer events");
         emit PumpFunTransfer(msg.sender, from, to, amount);
 
     }

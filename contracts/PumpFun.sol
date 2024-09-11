@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.20;
 // Uncomment this line to use console.log
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -54,7 +54,6 @@ contract PumpFun is ERC20, ReentrancyGuard, IERC721Receiver {
         uint256 tokensToMint = calculateTokenAmount(ethAfterFee);
         
         
-
         ethAmount += ethAfterFee;
         require(ethAmount <= MAX_ETH_AMOUNT, "Max ETH amount reached");
         require(tokensToMint > 0, "Not enough ETH sent");
