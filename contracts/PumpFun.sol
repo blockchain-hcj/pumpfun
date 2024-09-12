@@ -23,7 +23,7 @@ contract PumpFun is ERC20, ReentrancyGuard, IERC721Receiver {
 
     uint256 public tokensSold;
     uint256 public ethAmount;
-    uint256 public constant FEE_PERCENTAGE = 1; // 1% fee
+
     event Withdrawal(uint amount, uint when);
     
 
@@ -45,7 +45,7 @@ contract PumpFun is ERC20, ReentrancyGuard, IERC721Receiver {
 
         require(!isPaused, "Bonding curve phase ended");
 
-        uint256 fee = (buyEthAmount * FEE_PERCENTAGE) / 100;
+        uint256 fee = (buyEthAmount * factory.feePercent()) / 100;
         //Transfer fee to admin
         (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
         require(success, "Fee transfer to feeReceiver failed");
@@ -96,7 +96,7 @@ contract PumpFun is ERC20, ReentrancyGuard, IERC721Receiver {
         // Rearranging: remainingEth = buyAmount * (1 - FEE_PERCENTAGE / 100)
         // buyAmount = remainingEth / (1 - FEE_PERCENTAGE / 100)
         
-        uint256 maxEthToBuy = remainingEth * 100 / (100 - FEE_PERCENTAGE);
+        uint256 maxEthToBuy = remainingEth * 100 / (100 - factory.feePercent());
         
         return maxEthToBuy;
     }
@@ -109,7 +109,7 @@ contract PumpFun is ERC20, ReentrancyGuard, IERC721Receiver {
         uint256 ethToReturn = calculateEthAmount(amount);
 
 
-        uint256 fee = (ethToReturn * FEE_PERCENTAGE) / 100;
+        uint256 fee = (ethToReturn * factory.feePercent()) / 100;
 
         (bool success, ) = payable(factory.feeReceiver()).call{value: fee}("");
         require(success, "Fee transfer to feeReceiver failed");

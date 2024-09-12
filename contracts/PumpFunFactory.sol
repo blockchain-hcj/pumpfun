@@ -16,6 +16,7 @@ contract PumpFunFactory is Ownable {
 
     address public feeReceiver;
 
+    uint256 public feePercent;
     address public immutable WETH;
     address public immutable NONFUNGIBLE_POSITION_MANAGER;
     bytes32 public immutable PUMPFUN_BYTECODE_HASH;
@@ -30,6 +31,10 @@ contract PumpFunFactory is Ownable {
         WETH = _weth;
         NONFUNGIBLE_POSITION_MANAGER = _nonfungiblePositionManager;
         PUMPFUN_BYTECODE_HASH = _pumpFunBytecodeHash;
+    }
+
+    function setFeePercent(uint256 newFeePercent) public onlyOwner {
+        feePercent = newFeePercent;
     }
 
     function setFeeReceiver(address newFeeReceiver) public onlyOwner {
