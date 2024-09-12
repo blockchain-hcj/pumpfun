@@ -1,26 +1,32 @@
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import ContractAddresses from "../DeploymentOutput.json";
 import fs from "fs";
-import PumpFunFactoryABI from "../deployments-zk/zklink-sepolia/contracts/PumpFunFactory.sol/PumpFunFactory.json";
-import PumpFunABI from "../artifacts/contracts/PumpFun.sol/PumpFun.json";
+
+
+import PumpFunABI from "../artifacts-zk/contracts/PumpFun.sol/PumpFun.json";
+import PumpFunFactoryABI from "../artifacts-zk/contracts/PumpFunFactory.sol/PumpFunFactory.json";
+
 import { Secrets } from "../secrets";
 import { PumpFunFactory } from "../typechain-types";
+import { Address, BytesLike } from "ethers";
 async function main() {
-    const provider = new ethers.JsonRpcProvider(
-        'https://arb-sepolia.g.alchemy.com/v2/I-ZVEdUQy4Mk3rwbsNAIp_MVql6coseO',
-      );
 
-        const signer = new ethers.Wallet(Secrets.DEPLOYER_PRIVATEKEY, provider);
+    const provider = new ethers.JsonRpcProvider(network.config.url);
+
+    const signer = new ethers.Wallet(Secrets.DEPLOYER_PRIVATEKEY, provider);
       const pumpFunFactory = new ethers.Contract(
-        "0xa7d6942093b2d93Fef2E342B0A740ed54C9784E0",
+        "0x7f19656b47F3878c176e2A18cfF962c35240c5BD",
         PumpFunFactoryABI.abi,
         provider,
       )as unknown as PumpFunFactory;
 
       const pumpFun = await pumpFunFactory.createPumpFun.populateTransaction("name", "symbol", "stringSalt");
+
       console.log(pumpFun);
-      const tokenAdd = await pumpFunFactory.getCreate2Address("name", "symbol", signer.address, "stringSalt")
-      console.log(tokenAdd);
+      console.log(await pumpFunFactory.getCreate2Address("name", "symbol", signer.address, "stringSalt"));
+
+      
+
     //   const token = new ethers.Contract(
     //     tokenAdd,
     //     PumpFunABI.abi,
@@ -30,6 +36,13 @@ async function main() {
 
 
       
+}
+
+export function create2Address(sender: Address, bytecodeHash: BytesLike, salt: BytesLike, input: BytesLike) {
+    const prefix = ethers.keccak256(ethers.toUtf8Bytes("zksyncCreate2"));
+    const inputHash = ethers.keccak256(input);
+    const addressBytes = ethers.keccak256(ethers.concat([prefix, ethers.zeroPadValue(sender, 32), salt, bytecodeHash, inputHash])).slice(26);
+    return ethers.getAddress(addressBytes);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -17,22 +17,40 @@ contract EmissionTest is Test {
     function setUp() public{
         vm.deal(user1, 10000 ether);
 
-        vm.startPrank(user1);
+        vm.startPrank(owner);
         factory = new PumpFunFactory();
-    
+        vm.stopPrank();
 
 
     }
 
     function testCreateToken() public{
+        vm.startPrank(user1);
+        // factory.createPumpFun{value: 11 ether}("PumpFun", "PFP", "stringSalt")
 
-        factory.createPumpFun{value: 11 ether}("PumpFun", "PFP");
         
-        address[] memory tokens = factory.getDeployedPumpFuns();
-        uint256 contractBalance = IPumpFun(tokens[0]).balanceOf(user1);
-        uint256 maxEthToBuy = IPumpFun(tokens[0]).getMaxEthToBuy();
-        console.log(maxEthToBuy);
-        IPumpFun(tokens[0]).buy{value: maxEthToBuy }(100000000);
+
+        // addre,
+
+
+        address token = factory.testGetCreate2Address(
+            "name",
+             "symbol",
+            0x330BD48140Cf1796e3795A6b374a673D7a4461d0,
+            "stringSalt",
+            0x0100068bc401315450c272c83b3482b9dd4d4efc3a587ba0a08677509508d0e6,
+            0xBE692936366DD23EDd63204EfDAeEc34d6a02370,
+            0xdE1614049EFA45b96f302894541c81dc57Bb461a
+            );
+        console.log(token);
+        bytes32 bytecodeHash = factory.getPumpFunBytecodeHash();
+
+        //bytes32 bytecodeHash = factory.getSalt("stringSalt");
+
+         //uint256 contractBalance = IPumpFun(tokens[0]).balanceOf(user1);
+        // uint256 maxEthToBuy = IPumpFun(tokens[0]).getMaxEthToBuy();
+        // console.log(maxEthToBuy);
+        //IPumpFun(tokens[0]).buy{value: maxEthToBuy }();
         
             // IPumpFun(tokens[0]).buy{value: 1 ether}(10000);
 

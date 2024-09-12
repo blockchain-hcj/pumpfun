@@ -1,59 +1,82 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
-
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./PumpFun.sol";
 import "./Events.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+
 
 contract PumpFunFactory is Ownable {
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    EnumerableSet.AddressSet private deployedPumpFunsSet;
+
+
     Events public eventsContract;
-    address[] public deployedPumpFuns;
+
     address public feeReceiver;
 
-    address public constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address public constant NONFUNGIBLE_POSITION_MANAGER = 0xC36442b4a4522E871399CD717aBDD847Ab11FE88;
+    address public immutable WETH;
+    address public immutable NONFUNGIBLE_POSITION_MANAGER;
+    bytes32 public immutable PUMPFUN_BYTECODE_HASH;
+
+    
 
     mapping(address => address[]) public userCreatedTokens;
     event CreatePumpFun(address indexed token);
-    constructor() Ownable(msg.sender) {
+    constructor(address _weth, address _nonfungiblePositionManager, bytes32 _pumpFunBytecodeHash) Ownable(msg.sender) {
         eventsContract = new Events();
         feeReceiver = msg.sender;
+        WETH = _weth;
+        NONFUNGIBLE_POSITION_MANAGER = _nonfungiblePositionManager;
+        PUMPFUN_BYTECODE_HASH = _pumpFunBytecodeHash;
     }
 
     function setFeeReceiver(address newFeeReceiver) public onlyOwner {
         feeReceiver = newFeeReceiver;
     }
-
+    
     
     function createPumpFun(string memory name, string memory symbol, string memory stringSalt) public payable  {
         bytes32 salt = keccak256(abi.encodePacked(stringSalt));
         address create2Address = getCreate2Address(name, symbol, msg.sender, stringSalt);
-        eventsContract.setIsPumpToken(create2Address, true);
+        deployedPumpFunsSet.add(create2Address);
         PumpFun newPumpFun = new PumpFun{value: msg.value, salt: salt}(name, symbol, address(eventsContract), msg.sender);
-        deployedPumpFuns.push(address(newPumpFun));
         userCreatedTokens[msg.sender].push(address(newPumpFun));
         emit CreatePumpFun(address(newPumpFun));
     }
+
+    
 
     function getUserCreatedTokens(address user) public view returns (address[] memory) {
         return userCreatedTokens[user];
     }
 
-
-    function getCreate2Address(string memory name, string memory symbol, address sender, string memory stringSalt) public view returns (address) {
+   
+      function getCreate2Address(string memory name, string memory symbol, address sender, string memory stringSalt) public view returns (address) {
         bytes32 salt = keccak256(abi.encodePacked(stringSalt));
-        bytes memory bytecode = abi.encodePacked(
-            type(PumpFun).creationCode,
-            abi.encode(name, symbol, address(eventsContract), sender)
+
+        bytes memory input = abi.encode(name, symbol, address(eventsContract), sender);
+        bytes32 inputHash = keccak256(input);
+
+        bytes32 zksync_create2_prefix = keccak256("zksyncCreate2");
+        bytes32 address_hash = keccak256(
+            bytes.concat(
+                zksync_create2_prefix,
+                bytes32(uint256(uint160(address(this)))),
+                salt,
+                PUMPFUN_BYTECODE_HASH,
+                inputHash
+            )
         );
-        bytes32 hash = keccak256(
-            abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(bytecode))
-        );
-        return address(uint160(uint(hash)));
+        return address(uint160(uint256(address_hash)));
+    }  
+
+    function isPumpFun(address token) public view returns (bool) {
+        return deployedPumpFunsSet.contains(token);
     }
 
-
     function getDeployedPumpFuns() public view returns (address[] memory) {
-        return deployedPumpFuns;
+        return deployedPumpFunsSet.values();
     }
 }

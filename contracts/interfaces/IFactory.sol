@@ -11,4 +11,5 @@ interface IFactory {
 
     function NONFUNGIBLE_POSITION_MANAGER() external view returns (address);
 
+    function isPumpFun(address token) external view returns (bool);
 }
