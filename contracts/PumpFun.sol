@@ -203,8 +203,8 @@ contract PumpFun is ERC20, ReentrancyGuard, IERC721Receiver {
                 token0: token0,
                 token1: token1,
                 fee: 3000, // 0.3% fee tier
-                tickLower: 0,
-                tickUpper: 300000, 
+                tickLower: -887220,
+                tickUpper: 887220, 
                 amount0Desired: token0Amount,
                 amount1Desired: token1Amount,
                 amount0Min: 0, 
